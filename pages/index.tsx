@@ -1,23 +1,24 @@
-import Image from "next/image";
-import { BsTwitterX } from "react-icons/bs";
-import { GoHome, GoSearch, GoBell, GoMail, GoChecklist, GoBookmark, GoPeople } from "react-icons/go";
-import { FiUser } from "react-icons/fi";
-import { CgMoreO } from "react-icons/cg";
+import Image from "next/image"
+import { BsTwitterX } from "react-icons/bs"
+import { GoHome, GoSearch, GoBell, GoMail, GoChecklist, GoBookmark, GoPeople } from "react-icons/go"
+import { FiUser } from "react-icons/fi"
+import { CgMoreO } from "react-icons/cg"
 
-import FeedCard from "@/components/FeedCard";
+import FeedCard from "@/components/FeedCard"
 
-import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import { useCallback } from "react";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google"
+import { useCallback } from "react"
 
-import { toast } from "react-hot-toast";
-import { graphqlClient } from "@/clients/api";
-import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
+import { toast } from "react-hot-toast"
+import { graphqlClient } from "@/clients/api"
+import { verifyUserGoogleTokenQuery } from "@/graphql/query/user"
+import { useCurrentUser } from "@/hooks/user"
 
 
 // Define the structure of the sidebar button
 interface XSidebarButton {
-  title: string;
-  icon: React.ReactNode;
+  title: string
+  icon: React.ReactNode
 }
 
 // Sidebar menu items array
@@ -31,17 +32,19 @@ const sidebarMenuItems: XSidebarButton[] = [
   { title: "Communities", icon: <GoPeople /> },
   { title: "Profile", icon: <FiUser /> },
   { title: "More", icon: <CgMoreO /> },
-];
+]
 
 export default function Home() {
 
+  const {user} = useCurrentUser()
+
   const handleLoginWithGoogle = useCallback(async (cred: CredentialResponse) => {
     const googleToken = cred.credential
-    if (!googleToken) return toast.error(`Google token not found`);
-    const {verifyGoogleToken} = await graphqlClient.request(verifyUserGoogleTokenQuery, {token: googleToken});
+    if (!googleToken) return toast.error(`Google token not found`)
+    const {verifyGoogleToken} = await graphqlClient.request(verifyUserGoogleTokenQuery, {token: googleToken})
 
 
-    toast.success(`verified success`);
+    toast.success(`verified success`)
     console.log(verifyGoogleToken)
 
     if(verifyGoogleToken) window.localStorage.setItem('__twitter_token', verifyGoogleToken)
@@ -51,7 +54,7 @@ export default function Home() {
     <div>
       <div className="grid grid-cols-12 h-screen w-screen px-56">
         {/* Sidebar Section */}
-        <div className="col-span-4 pt-8 px-4 ml-28">
+        <div className="col-span-4 pt-8 px-4 ml-28 relative">
           {/* Twitter icon */}
           <div className="text-3xl h-fit w-fit hover:bg-gray-800 rounded-full p-4 cursor-pointer transition-all">
             <BsTwitterX />
@@ -73,6 +76,10 @@ export default function Home() {
               <button className="bg-sky-500 text-xl p-4 rounded-full w-full mt-5">Post</button>
             </div>
           </div>
+         {user && (<div className="absolute bottom-16 flex gap-2 bg-slate-800 px-3 py-2 rounded-full">
+          {user && user.profileImageUrl && (<Image className="rounded-full" src={user?.profileImageUrl} alt="profile-img" height={50} width={50} />)}
+          <h3 className="text-xl">{user.firstName} {user.lastName}</h3>
+         </div>)}
         </div>
 
         {/* Main Content Area */}
@@ -90,12 +97,12 @@ export default function Home() {
 
         {/* Placeholder for Additional Content */}
         <div className="col-span-3 p-5">
-          <div className="border p-5 bg-slate-700 rounded-lg">
+          {!user && (<div className="border p-5 bg-slate-700 rounded-lg">
             <h1 className="my-2 text-xl">New to X?</h1>
            <GoogleLogin onSuccess={handleLoginWithGoogle}/> 
-           </div>
+           </div>) }
         </div>
       </div>
     </div>
-  );
+  )
 }

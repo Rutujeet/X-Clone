@@ -5,7 +5,7 @@ import { LiaRetweetSolid } from "react-icons/lia";
 
 const FeedCard: React.FC =  () => {
     return (
-    <div className="border-b-[1px] border-slate-700 p-4">
+    <div className="border-b-[1px] border-slate-700 p-4 cursor-pointer">
 <div className="grid grid-cols-12 gap-3">
     <div className="col-span-1">
         <Image src="https://i.redd.it/iysrp1i7afl31.png" alt="user-image" height={50} width={50} className="rounded-full"/>
