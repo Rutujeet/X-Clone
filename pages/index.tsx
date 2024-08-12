@@ -6,6 +6,13 @@ import { CgMoreO } from "react-icons/cg";
 
 import FeedCard from "@/components/FeedCard";
 
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import { useCallback } from "react";
+
+import { toast } from "react-hot-toast";
+import { graphqlClient } from "@/clients/api";
+import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
+
 
 // Define the structure of the sidebar button
 interface XSidebarButton {
@@ -27,11 +34,24 @@ const sidebarMenuItems: XSidebarButton[] = [
 ];
 
 export default function Home() {
+
+  const handleLoginWithGoogle = useCallback(async (cred: CredentialResponse) => {
+    const googleToken = cred.credential
+    if (!googleToken) return toast.error(`Google token not found`);
+    const {verifyGoogleToken} = await graphqlClient.request(verifyUserGoogleTokenQuery, {token: googleToken});
+
+
+    toast.success(`verified success`);
+    console.log(verifyGoogleToken)
+
+    if(verifyGoogleToken) window.localStorage.setItem('__twitter_token', verifyGoogleToken)
+
+  }, [])
   return (
     <div>
       <div className="grid grid-cols-12 h-screen w-screen px-56">
         {/* Sidebar Section */}
-        <div className="col-span-3 pt-8 px-4 ml-28">
+        <div className="col-span-4 pt-8 px-4 ml-28">
           {/* Twitter icon */}
           <div className="text-3xl h-fit w-fit hover:bg-gray-800 rounded-full p-4 cursor-pointer transition-all">
             <BsTwitterX />
@@ -69,7 +89,12 @@ export default function Home() {
         </div>
 
         {/* Placeholder for Additional Content */}
-        <div className="col-span-3"></div>
+        <div className="col-span-3 p-5">
+          <div className="border p-5 bg-slate-700 rounded-lg">
+            <h1 className="my-2 text-xl">New to X?</h1>
+           <GoogleLogin onSuccess={handleLoginWithGoogle}/> 
+           </div>
+        </div>
       </div>
     </div>
   );
